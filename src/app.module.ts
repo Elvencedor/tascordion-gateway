@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ListItemModule } from './modules/listItems.module';
+// import { ListItemModule } from './modules/listItems.module';
 import { ListModule } from './modules/lists.module';
 
 @Module({
-  imports: [ListModule, ListItemModule],
+  imports: [ConfigModule.forRoot(), ListModule],
   controllers: [AppController],
   providers: [AppService],
 })

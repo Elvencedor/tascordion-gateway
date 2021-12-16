@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+package gateway;
+
+import "./lists.proto";
+import "./listItems.proto";

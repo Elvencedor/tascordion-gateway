@@ -1,35 +1,35 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-} from '@nestjs/common';
-import { ListService } from 'src/services/lists.service';
+import { Controller, Get, Inject, OnModuleInit, Post } from '@nestjs/common';
+import { ClientGrpc, GrpcMethod } from '@nestjs/microservices';
+import { ListServiceClient } from 'src/interfaces/lists.interface';
 
-@Controller()
-export class ListController {
-  constructor(private readonly listService: ListService) {}
+@Controller('lists')
+export class ListController implements OnModuleInit {
+  private listService: ListServiceClient;
+  constructor(@Inject('LIST_MICROSERVICE') private client: ClientGrpc) {}
+
+  onModuleInit() {
+    this.listService =
+      this.client.getService<ListServiceClient>('ListProtoService');
+  }
 
   @Get()
   getHello(): string {
-    return this.listService.getHello();
+    return 'HELLO SOMEBODY!';
   }
 
-  @Post('/create-list')
-  createList(@Body() listDTO) {
-    return this.listService.create(listDTO);
+  @Post('create')
+  createList(listDTO: { title: string }) {
+    console.log(listDTO);
+    return this.listService.createList(listDTO).toPromise();
   }
 
-  @Put('/update-list/:listId')
-  updateListById(@Body() listDTO, @Param('listId') listId) {
-    return this.listService.updateById(listDTO, listId);
+  @GrpcMethod('ListProtoService', 'updateListById')
+  updateListById(listDTO: { title: string }, listId: string) {
+    return this.listService.updateListById(listDTO, listId).toPromise();
   }
 
-  @Delete('/delete-list/:listId')
-  deleteListById(@Param('listId') listId) {
-    return this.listService.deleteById(listId);
+  @GrpcMethod('ListProtoService', 'deleteListById')
+  deleteListById(listId: string) {
+    return this.listService.deleteListById(listId).toPromise();
   }
 }
